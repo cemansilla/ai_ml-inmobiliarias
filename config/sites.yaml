@@ -1,0 +1,5 @@
+zonaprop:
+  # 
+  name: 'ZonaProp'
+  base_url: 'https://www.zonaprop.com.ar'
+  list_uri: 'departamentos.html'
