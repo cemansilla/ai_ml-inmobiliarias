@@ -1,0 +1,5 @@
+[MongodbAtlas]
+host = <your.host>
+name = <your.name>
+user = <your.user>
+pass = <your.pass>

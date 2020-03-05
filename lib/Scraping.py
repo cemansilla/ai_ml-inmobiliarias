@@ -20,16 +20,19 @@ class Scraping(ABC):
     """Obtiene la estructura HTML de los items en el listado
 
     Returns:
-    array:Listado
+    array: Listado
     """
     pass
 
   @abstractmethod
-  def extractData(self):
+  def extractData(self, item):
     """Extrae la info del item dado
     
+    Parameters:
+    item (object): Nodo HTML del cual extraer la data
+
     Returns:
-    dict:Info
+    dict: Info
     """
     pass
 
@@ -40,6 +43,31 @@ class Scraping(ABC):
     Parameters:
     data (array): Info a almacenar
     filename (string): Nombre de archivo
+
+    Returns:
+    void
+    """
+    pass
+
+  @abstractmethod
+  def saveDataToXlsx(self, data, file_name):
+    """Almacena la data en un Excel
+    
+    Parameters:
+    data (array): Info a almacenar
+    filename (string): Nombre de archivo
+
+    Returns:
+    void
+    """
+    pass
+
+  @abstractmethod
+  def saveDataToMongoDB(self, data):
+    """Almacena la data en MongoDB
+    
+    Parameters:
+    data (array): Info a almacenar
 
     Returns:
     void

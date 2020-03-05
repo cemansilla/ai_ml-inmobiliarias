@@ -1,3 +1,4 @@
+from .MongoDBClient import MongoDBClient
 from .Scraping import Scraping
 from bs4 import BeautifulSoup
 import requests
@@ -13,7 +14,7 @@ class ZonaProp(Scraping):
     """Obtiene la estructura HTML de los items en el listado
 
     Returns:
-    array:Listado
+    array: Listado
     """
     property_html = self.page_content.find_all('div', {'class': ['posting-card', 'super-highlighted']})
 
@@ -23,11 +24,15 @@ class ZonaProp(Scraping):
 
     return a_info
 
+    
   def extractData(self, item):
     """Extrae la info del item dado
     
+    Parameters:
+    item (object): Nodo HTML del cual extraer la data
+
     Returns:
-    dict:Info
+    dict: Info
     """
     #ID
     _id = item.get('data-id')
@@ -68,7 +73,7 @@ class ZonaProp(Scraping):
     _expenses = clean_text_string(_expenses.text) if _expenses else ''
 
     info = dict({
-      'id': _id,
+      'site_id': _id,
       'href': _href,
       'address': _address,
       'title': _title,
@@ -93,7 +98,6 @@ class ZonaProp(Scraping):
     """
     df = pd.DataFrame(data)
     df.to_csv(self.getDataSavePath() + file_name + '.csv', encoding='utf-8-sig')
-    pass
 
   def saveDataToXlsx(self, data, file_name = 'test'):
     """Almacena la data en un Excel
@@ -107,4 +111,14 @@ class ZonaProp(Scraping):
     """
     df = pd.DataFrame(data)
     df.to_excel(self.getDataSavePath() + file_name + '.xlsx', sheet_name=self.identifier)
+
+  def saveDataToMongoDB(self, data):
+    """Almacena la data en MongoDB
+    
+    Parameters:
+    data (array): Info a almacenar
+
+    Returns:
+    void
+    """
     pass

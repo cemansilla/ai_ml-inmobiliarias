@@ -18,6 +18,8 @@ Recomiendo usar [pip](https://pip.pypa.io/en/stable/installing/).
 - BeautifulSoup
 - Pandas
 - Selenium
+- PyMongo
+- dnspython
 
 ## Ideas / Pendientes
 - Incorporar Selenium
