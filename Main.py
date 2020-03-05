@@ -14,7 +14,18 @@ if(config_zonaprop):
   #zonaprop.saveDataToCsv(zp_info)
   #zonaprop.saveDataToXlsx(zp_info)
 
-  db = MongoDBClient()
-  print(db.isConnected())
+  mc = MongoDBClient()
+  if(mc.isConnected()):
+    #print('list_collection_names', mc.db.list_collection_names())
+    #print('list inmuebles', mc.db['inmuebles'].find())
+
+    # Ejecuto query
+    mc.query('inmuebles')
+    if(mc.num_rows() > 0):
+      print(mc.get_rows())
+    else:
+      print('no hay datos')
+  else:
+    print('Error de conexión')
 else:
   print('Es requerida la configuración para ZonaProp')
