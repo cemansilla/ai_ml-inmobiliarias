@@ -2,6 +2,8 @@ from lib.ZonaProp import ZonaProp
 from lib.MongoDBClient import MongoDBClient
 from Helper import *
 
+from bson.objectid import ObjectId
+
 # Cargo archivo de configuración de sitios
 config_sites = get_sites_config()
 
@@ -16,15 +18,37 @@ if(config_zonaprop):
 
   mc = MongoDBClient()
   if(mc.isConnected()):
-    #print('list_collection_names', mc.db.list_collection_names())
-    #print('list inmuebles', mc.db['inmuebles'].find())
+    # Delete
+    #filters = { 'many': { '$regex': 'array' } }
+    #mc.delete('inmuebles', filters)
+    #print('borrados', mc.deleted_rows())
 
-    # Ejecuto query
-    mc.query('inmuebles')
+    # Insert
+    #mc.insert('inmuebles', [{'many': 'array 2 b'},{'many': 'array 2 c'}])
+    #print('insertados 1', mc.affected_rows())
+    #mc.insert('inmuebles', {'many': 'dict 2 b'})
+    #print('insertados 2', mc.affected_rows())
+
+    # Update
+    #data = { 'key': 'actualizado by value', 'nueva_key': ':)', 'todos': '...' }
+    #condition = { 'title': { '$regex': 'ipsum' } }
+    #condition = { '_id': ObjectId('5e63af1141f68b2a481ce30f') }
+    #condition = {}    
+    #mc.update('inmuebles', data, condition)
+    #print('afectados', mc.affected_rows())
+
+    # Consulta
+    """
+    filters = { 'key': { '$regex': 'valu' } }
+    order = [('key',1)]
+    filters = {}
+    order = {}
+    mc.query('inmuebles', filters, order)
     if(mc.num_rows() > 0):
       print(mc.get_rows())
     else:
       print('no hay datos')
+    """
   else:
     print('Error de conexión')
 else:
