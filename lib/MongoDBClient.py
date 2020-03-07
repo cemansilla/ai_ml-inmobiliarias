@@ -81,7 +81,7 @@ class MongoDBClient():
     self.__rs = self.db[collection_name].update_many(condition, {
       '$set': data,
       '$currentDate': { 'lastModified': True }
-    })
+    }, True)
     self.__last_query = 'update'
 
   def num_rows(self):

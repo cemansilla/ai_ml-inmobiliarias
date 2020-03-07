@@ -10,7 +10,7 @@ config_sites = get_sites_config()
 # Procesamiento de ZonaProp
 config_zonaprop = config_sites.get('zonaprop')
 if(config_zonaprop):
-  #zonaprop = ZonaProp(config_zonaprop)
+  zonaprop = ZonaProp(config_zonaprop)
   #zp_info = zonaprop.getInfoList()
 
   #zonaprop.saveDataToCsv(zp_info)
@@ -18,6 +18,27 @@ if(config_zonaprop):
 
   mc = MongoDBClient()
   if(mc.isConnected()):
+    """
+    #Desde scraping
+    for data in zp_info:
+      condition = { 'site_id': data['site_id'] }
+      mc.update('inmuebles', data, condition)
+    """
+
+    """
+    #Desde Excel
+    zp_info = zonaprop.getDataFromXls()
+
+    for index, row in zp_info.iterrows():
+      #Convierto a diccionario
+      data = row.to_dict()
+      #Remuevo la primer columna del dataset
+      data.pop('Unnamed: 0', None)
+      #Clave primaria
+      condition = { 'site_id': data['site_id'] }
+      mc.update('inmuebles', data, condition)
+    """
+
     # Delete
     #filters = { 'many': { '$regex': 'array' } }
     #mc.delete('inmuebles', filters)

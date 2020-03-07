@@ -59,11 +59,6 @@ class ZonaProp(Scraping):
     _short_description = item.find('div', {'class': ['posting-description']})
     _short_description = clean_text_string(_short_description.text) if _short_description else ''
 
-    #Descripción extendida    
-    child_page_response = requests.get(self.base_url + _href, timeout=5)
-    child_page_content = BeautifulSoup(child_page_response.content, 'html.parser').find('section', {'class': ['article-section-description']})
-    _description = child_page_content.getText() if child_page_content else ''
-
     #Precio
     _price = item.find('span', {'class': ['first-price']})
     _price = clean_text_string(_price.text) if _price else ''
@@ -71,6 +66,18 @@ class ZonaProp(Scraping):
     #Expensas
     _expenses = item.find('span', {'class': ['expenses']})
     _expenses = clean_text_string(_expenses.text) if _expenses else ''
+
+    #Data extraida desde la interna
+    child_page_response = requests.get(self.base_url + _href, timeout=5)
+    child_page_html_content = BeautifulSoup(child_page_response.content, 'html.parser')
+
+    #Descripción extendida    
+    child_page_content = child_page_html_content.find('div', {'class': ['description-container']})
+    _description = clean_text_string(child_page_content.getText()) if child_page_content else ''
+
+    #Fecha publicacion
+    child_page_content = child_page_html_content.find('h5', {'class': ['section-date']})
+    _publish_date = clean_text_string(child_page_content.getText()) if child_page_content else ''
 
     info = dict({
       'site_id': _id,
@@ -80,13 +87,14 @@ class ZonaProp(Scraping):
       'features': _features,
       'short_description': _short_description,
       'description': _description,
+      'publish_date': _publish_date,
       'price': _price,
       'expenses': _expenses
     })
 
     return info
 
-  def saveDataToCsv(self, data, file_name = 'test'):
+  def saveDataToCsv(self, data, file_name = 'zonaprop_data'):
     """Almacena la data en un csv
     
     Parameters:
@@ -99,7 +107,7 @@ class ZonaProp(Scraping):
     df = pd.DataFrame(data)
     df.to_csv(self.getDataSavePath() + file_name + '.csv', encoding='utf-8-sig')
 
-  def saveDataToXlsx(self, data, file_name = 'test'):
+  def saveDataToXlsx(self, data, file_name = 'zonaprop_data'):
     """Almacena la data en un Excel
     
     Parameters:
@@ -112,13 +120,50 @@ class ZonaProp(Scraping):
     df = pd.DataFrame(data)
     df.to_excel(self.getDataSavePath() + file_name + '.xlsx', sheet_name=self.identifier)
 
-  def saveDataToMongoDB(self, data):
+  def saveDataToMongoDB(self, collection_name, data):
     """Almacena la data en MongoDB
     
     Parameters:
+    collection_name (string): Nombre de la colección
     data (array): Info a almacenar
 
     Returns:
     void
     """
+    mc = MongoDBClient()
+
+    if(mc.isConnected()):
+      pass
+    
+  def getDataFromCsv(self, file_name = 'zonaprop_data'):
+    """
+    Lee la data desde un csv
+
+    Parameters:
+    filename (string): Nombre de archivo
+
+    Retuns:
+    mixed: Dataframe | False
+    """
+    try:
+      return pd.read_csv(self.getDataSavePath() + file_name + '.csv')
+    except:
+      return False
+
+  def getDataFromXls(self, file_name = 'zonaprop_data'):
+    """
+    Lee la data desde un Excel
+
+    Parameters:
+    filename (string): Nombre de archivo
+
+    Retuns:
+    mixed: Dataframe | False
+    """
+    try:
+      return pd.read_excel(self.getDataSavePath() + file_name + '.xlsx')
+    except:
+      return False
+
+  def getDataFromMongo(self):
     pass
