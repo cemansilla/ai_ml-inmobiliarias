@@ -80,7 +80,7 @@ class MongoDBClient():
     """
     self.__rs = self.db[collection_name].update_many(condition, {
       '$set': data,
-      '$currentDate': { 'lastModified': True }
+      '$currentDate': { 'last_modified': True }
     }, True)
     self.__last_query = 'update'
 

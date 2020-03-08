@@ -10,6 +10,9 @@ class ZonaProp(Scraping):
   def __init__(self, config):
     super().__init__(config)
 
+    # Cargo archivo de configuración de sitios
+    self.config_sites = get_sites_config()
+
   def getInfoList(self):
     """Obtiene la estructura HTML de los items en el listado
 
@@ -165,5 +168,25 @@ class ZonaProp(Scraping):
     except:
       return False
 
-  def getDataFromMongo(self):
-    pass
+  def getDataFromMongo(self, collection_name, filters = {}, order = {}):
+    """
+    Consulta la data de inmuebles almacenada en Mongo
+
+    Parameters:
+    collection_name (string): Nombre de la colección
+
+    Returns:
+    array
+    """
+    documents = []
+
+    mc = MongoDBClient()
+    
+    if(mc.isConnected()):
+      order = [('last_modified',1)]
+      mc.query('inmuebles', filters, order)
+
+      if(mc.num_rows() > 0):
+        documents = mc.get_rows()
+    
+    return documents

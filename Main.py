@@ -59,17 +59,12 @@ if(config_zonaprop):
     #print('afectados', mc.affected_rows())
 
     # Consulta
-    """
-    filters = { 'key': { '$regex': 'valu' } }
-    order = [('key',1)]
-    filters = {}
-    order = {}
-    mc.query('inmuebles', filters, order)
-    if(mc.num_rows() > 0):
-      print(mc.get_rows())
+    filters = { 'address': { '$regex': 'belgrano', '$options': 'i' } }
+    zp_info = zonaprop.getDataFromMongo('inmuebles', filters)
+    if zp_info:
+      print(zp_info)
     else:
       print('no hay datos')
-    """
   else:
     print('Error de conexión')
 else:
