@@ -1,6 +1,7 @@
 from .MongoDBClient import MongoDBClient
 from .Scraping import Scraping
 from bs4 import BeautifulSoup
+from urllib import parse
 import requests
 from Helper import *
 import pandas as pd
@@ -82,10 +83,24 @@ class ZonaProp(Scraping):
     child_page_content = child_page_html_content.find('h5', {'class': ['section-date']})
     _publish_date = clean_text_string(child_page_content.getText()) if child_page_content else ''
 
+    #Latitud / Longitud
+    child_page_content = child_page_html_content.find('img', {'id': 'static-map'})
+    _lat_lng = child_page_content['src'] if child_page_content.has_attr('src') else False
+    if(_lat_lng):
+      _, query_string = parse.splitquery(_lat_lng)
+      query = parse.parse_qs(query_string)
+      if query['center']:
+        str_center = query['center'][0].split(',')
+        _lat_lng = {
+          'lat': str_center[0],
+          'lng': str_center[1]
+        }
+
     info = dict({
       'site_id': _id,
       'href': _href,
       'address': _address,
+      'lat_lng': _lat_lng,
       'title': _title,
       'features': _features,
       'short_description': _short_description,

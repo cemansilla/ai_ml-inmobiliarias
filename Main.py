@@ -2,8 +2,6 @@ from lib.ZonaProp import ZonaProp
 from lib.MongoDBClient import MongoDBClient
 from Helper import *
 
-from bson.objectid import ObjectId
-
 # Cargo archivo de configuración de sitios
 config_sites = get_sites_config()
 
@@ -11,60 +9,56 @@ config_sites = get_sites_config()
 config_zonaprop = config_sites.get('zonaprop')
 if(config_zonaprop):
   zonaprop = ZonaProp(config_zonaprop)
-  #zp_info = zonaprop.getInfoList()
+  zp_info = zonaprop.getInfoList()
 
-  #zonaprop.saveDataToCsv(zp_info)
-  #zonaprop.saveDataToXlsx(zp_info)
+  # Almacenamiento en CSV / Excel
+  """
+  zonaprop.saveDataToCsv(zp_info)
+  zonaprop.saveDataToXlsx(zp_info)
+  """
 
+  # Conexión a MongoDB
   mc = MongoDBClient()
   if(mc.isConnected()):
+    # Borro documentos
+    # ATENCIÓN: si el parámetro filters está vacio borrará todos los documentos
     """
-    #Desde scraping
+    filters = {}
+    mc.delete('inmuebles', filters)
+    print('borrados', mc.deleted_rows())
+    """
+
+    # Inserto / Actualizo en MongoDB desde scraping
+    """
     for data in zp_info:
       condition = { 'site_id': data['site_id'] }
       mc.update('inmuebles', data, condition)
     """
-
+    
+    # Inserto / Actualizo en MongoDB desde Excel
     """
-    #Desde Excel
     zp_info = zonaprop.getDataFromXls()
-
     for index, row in zp_info.iterrows():
       #Convierto a diccionario
       data = row.to_dict()
+
       #Remuevo la primer columna del dataset
       data.pop('Unnamed: 0', None)
+
       #Clave primaria
       condition = { 'site_id': data['site_id'] }
       mc.update('inmuebles', data, condition)
     """
 
-    # Delete
-    #filters = { 'many': { '$regex': 'array' } }
-    #mc.delete('inmuebles', filters)
-    #print('borrados', mc.deleted_rows())
-
-    # Insert
-    #mc.insert('inmuebles', [{'many': 'array 2 b'},{'many': 'array 2 c'}])
-    #print('insertados 1', mc.affected_rows())
-    #mc.insert('inmuebles', {'many': 'dict 2 b'})
-    #print('insertados 2', mc.affected_rows())
-
-    # Update
-    #data = { 'key': 'actualizado by value', 'nueva_key': ':)', 'todos': '...' }
-    #condition = { 'title': { '$regex': 'ipsum' } }
-    #condition = { '_id': ObjectId('5e63af1141f68b2a481ce30f') }
-    #condition = {}    
-    #mc.update('inmuebles', data, condition)
-    #print('afectados', mc.affected_rows())
-
-    # Consulta
+    # Consulto documentos de inmuebles almacenados en MongoDB
+    """
     filters = { 'address': { '$regex': 'belgrano', '$options': 'i' } }
     zp_info = zonaprop.getDataFromMongo('inmuebles', filters)
     if zp_info:
       print(zp_info)
     else:
       print('no hay datos')
+    """
   else:
     print('Error de conexión')
 else:

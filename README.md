@@ -22,8 +22,8 @@ Recomiendo usar [pip](https://pip.pypa.io/en/stable/installing/).
 - dnspython
 
 ## Ideas / Pendientes
-- Incorporar Selenium
-- Obtener info de Google Maps
+- ~~Incorporar Selenium~~ (Descartado. Se procesará el mapa con la API.)
+- ~~Obtener info de Google Maps~~
   - Calcular distancia
 - ~~Almacenar / Actualizar info en DB~~
 - Procesar de lenguaje en descripciones (NLP)
