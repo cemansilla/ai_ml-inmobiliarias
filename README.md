@@ -22,6 +22,9 @@ Recomiendo usar [pip](https://pip.pypa.io/en/stable/installing/).
 - dnspython
 
 ## Ideas / Pendientes
+- Aplicar filtros en listados
+- Procesar páginas. Establecer límites
+- Convertir en webservice
 - ~~Incorporar Selenium~~ (Descartado. Se procesará el mapa con la API.)
 - ~~Obtener info de Google Maps~~
   - Calcular distancia
