@@ -199,7 +199,7 @@ class ZonaProp(Scraping):
     
     if(mc.isConnected()):
       order = [('last_modified',1)]
-      mc.query('inmuebles', filters, order)
+      mc.query(collection_name, filters, order)
 
       if(mc.num_rows() > 0):
         documents = mc.get_rows()
