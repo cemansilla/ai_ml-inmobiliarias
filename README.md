@@ -25,7 +25,7 @@ Recomiendo usar [pip](https://pip.pypa.io/en/stable/installing/).
 - Incorporar Selenium
 - Obtener info de Google Maps
   - Calcular distancia
-- Almacenar / Actualizar info en DB
+- ~~Almacenar / Actualizar info en DB~~
 - Procesar de lenguaje en descripciones (NLP)
 - Incorporar otros sitios
 - Envío de alertas de oportunidades
