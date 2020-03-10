@@ -3,6 +3,28 @@ import os
 from pathlib import Path
 import yaml
 import configparser
+import re
+
+def modify_url_string(url, pattern_string, uri_pattern, uri_separator, value):
+  """
+  Modifica la URL de navegación para agregar filtros o paginado
+
+  Parameters:
+  url (string)
+  pattern_string (string): expresión regular
+  uri_pattern (string): porcion variable en el string
+  uri_separator (string)
+  value (mixed)
+  """
+  pattern = re.compile(pattern_string)
+  _re = pattern.findall(url)
+  if(_re):
+    url = pattern.sub(uri_pattern + uri_separator + str(value), url)
+  else:
+    position = url.find('.html')
+    url = url[:position] + uri_separator + uri_pattern + uri_separator + str(value) + url[position:]
+
+  return url
 
 def get_sites_config():
   """

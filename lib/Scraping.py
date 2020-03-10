@@ -11,10 +11,6 @@ class Scraping(ABC):
     self.identifier = config['name']
     super().__init__()
 
-    #Get HTML page content
-    page_response = requests.get(self.url, timeout=5)
-    self.page_content = BeautifulSoup(page_response.content, 'html.parser')
-
   @abstractmethod
   def getInfoList(self):
     """Obtiene la estructura HTML de los items en el listado

@@ -9,7 +9,7 @@ config_sites = get_sites_config()
 config_zonaprop = config_sites.get('zonaprop')
 if(config_zonaprop):
   zonaprop = ZonaProp(config_zonaprop)
-  zp_info = zonaprop.getInfoList()
+  zp_info = zonaprop.getInfoList()  
 
   # Almacenamiento en CSV / Excel
   """

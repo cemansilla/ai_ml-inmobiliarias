@@ -5,6 +5,7 @@ from urllib import parse
 import requests
 from Helper import *
 import pandas as pd
+import re
 
 class ZonaProp(Scraping):
   # Initializer / Instance Attributes
@@ -14,17 +15,31 @@ class ZonaProp(Scraping):
     # Cargo archivo de configuración de sitios
     self.config_sites = get_sites_config()
 
-  def getInfoList(self):
+  def getInfoList(self, limit_pages = 3):
     """Obtiene la estructura HTML de los items en el listado
 
     Returns:
     array: Listado
     """
-    property_html = self.page_content.find_all('div', {'class': ['posting-card', 'super-highlighted']})
-
+    current_page = 1    
     a_info = []
-    for item in property_html:
-      a_info.append(self.extractData(item))
+
+    while True:
+      # Modifico URL dependiendo de página actual
+      if(current_page > 1):
+        self.url = modify_url_string(self.url, 'pagina-\d', 'pagina', '-', current_page)
+
+      # Obtengo contenido de la página actual
+      page_response = requests.get(self.url, timeout=5)
+      self.page_content = BeautifulSoup(page_response.content, 'html.parser')
+      property_html = self.page_content.find_all('div', {'class': ['posting-card', 'super-highlighted']})
+    
+      for item in property_html:
+        a_info.append(self.extractData(item))
+
+      current_page += 1
+      if(current_page > limit_pages):
+        break
 
     return a_info
 
@@ -38,6 +53,57 @@ class ZonaProp(Scraping):
     Returns:
     dict: Info
     """
+
+    ###
+    """
+    ### Paginado ###
+    https://www.zonaprop.com.ar/departamentos-pagina-2.html
+    https://www.zonaprop.com.ar/departamentos-2-ambientes-orden-precio-ascendente-pagina-2.html
+
+    ### Filtros ###
+    
+    # Orden
+    https://www.zonaprop.com.ar/departamentos-orden-publicado-descendente.html
+    https://www.zonaprop.com.ar/departamentos-orden-precio-ascendente.html
+    https://www.zonaprop.com.ar/departamentos-orden-antiguedad-ascendente.html
+
+    # Zona
+    https://www.zonaprop.com.ar/departamentos-alquiler-caballito.html
+    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo.html
+
+    # Rango de precios
+    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-5000-15000-pesos.html
+    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-mas-5000-pesos.html
+    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-menos-15000-pesos.html
+
+    # Expensas
+    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-menos-15000-pesos-100-200-expensas.html
+    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-menos-15000-pesos-mas-100-expensas.html
+    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-menos-15000-pesos-menos-200-expensas.html
+
+    # Ambientes
+    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-2-ambientes-menos-15000-pesos-mas-100-expensas.html
+
+    # Tipo
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-ambientes-menos-15000-pesos-mas-100-expensas.html
+
+    # Habitaciones
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-1-habitacion-2-ambientes-menos-15000-pesos-mas-100-expensas.html
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-15000-pesos-mas-100-expensas.html
+
+    # Superficie
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-mas-15-m2-cubiertos-menos-15000-pesos-mas-100-expensas.html
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-menos-15000-pesos-mas-100-expensas.html
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-15-35-m2-cubiertos-menos-15000-pesos-mas-100-expensas.html
+
+    # Fecha de publicación
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-2-dias-menos-15000-pesos-mas-100-expensas.html
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-1-dia-menos-15000-pesos-mas-100-expensas.html
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-1-semana-menos-15000-pesos-mas-100-expensas.html
+    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-45-dias-menos-15000-pesos-mas-100-expensas.html
+    """
+    ###
+
     #ID
     _id = item.get('data-id')
 
