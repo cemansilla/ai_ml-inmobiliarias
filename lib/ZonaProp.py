@@ -15,7 +15,7 @@ class ZonaProp(Scraping):
     # Cargo archivo de configuración de sitios
     self.config_sites = get_sites_config()
 
-  def getInfoList(self, limit_pages = 3):
+  def getInfoList(self, limit_pages = 3, filters = dict()):
     """Obtiene la estructura HTML de los items en el listado
 
     Returns:
@@ -24,37 +24,8 @@ class ZonaProp(Scraping):
     current_page = 1    
     a_info = []
 
-    while True:
-      # Modifico URL dependiendo de página actual
-      if(current_page > 1):
-        self.url = modify_url_string(self.url, 'pagina-\d', 'pagina', '-', current_page)
-
-      # Obtengo contenido de la página actual
-      page_response = requests.get(self.url, timeout=5)
-      self.page_content = BeautifulSoup(page_response.content, 'html.parser')
-      property_html = self.page_content.find_all('div', {'class': ['posting-card', 'super-highlighted']})
-    
-      for item in property_html:
-        a_info.append(self.extractData(item))
-
-      current_page += 1
-      if(current_page > limit_pages):
-        break
-
-    return a_info
-
-    
-  def extractData(self, item):
-    """Extrae la info del item dado
-    
-    Parameters:
-    item (object): Nodo HTML del cual extraer la data
-
-    Returns:
-    dict: Info
-    """
-
-    ###
+    ### Procesamiento de filtros
+    print('filters', filters)
     """
     ### Paginado ###
     https://www.zonaprop.com.ar/departamentos-pagina-2.html
@@ -102,8 +73,37 @@ class ZonaProp(Scraping):
     https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-1-semana-menos-15000-pesos-mas-100-expensas.html
     https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-45-dias-menos-15000-pesos-mas-100-expensas.html
     """
-    ###
+    ### ./Procesamiento de filtros
 
+    while True:
+      # Modifico URL dependiendo de página actual
+      if(current_page > 1):
+        self.url = modify_url_string(self.url, 'pagina-\d', 'pagina', '-', current_page)
+
+      # Obtengo contenido de la página actual
+      page_response = requests.get(self.url, timeout=5)
+      self.page_content = BeautifulSoup(page_response.content, 'html.parser')
+      property_html = self.page_content.find_all('div', {'class': ['posting-card', 'super-highlighted']})
+    
+      for item in property_html:
+        a_info.append(self.extractData(item))
+
+      current_page += 1
+      if(current_page > limit_pages):
+        break
+
+    return a_info
+
+    
+  def extractData(self, item):
+    """Extrae la info del item dado
+    
+    Parameters:
+    item (object): Nodo HTML del cual extraer la data
+
+    Returns:
+    dict: Info
+    """
     #ID
     _id = item.get('data-id')
 
@@ -151,7 +151,7 @@ class ZonaProp(Scraping):
 
     #Latitud / Longitud
     child_page_content = child_page_html_content.find('img', {'id': 'static-map'})
-    _lat_lng = child_page_content['src'] if child_page_content.has_attr('src') else False
+    _lat_lng = child_page_content['src'] if child_page_content and child_page_content.has_attr('src') else False
     if(_lat_lng):
       _, query_string = parse.splitquery(_lat_lng)
       query = parse.parse_qs(query_string)

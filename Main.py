@@ -9,7 +9,14 @@ config_sites = get_sites_config()
 config_zonaprop = config_sites.get('zonaprop')
 if(config_zonaprop):
   zonaprop = ZonaProp(config_zonaprop)
-  zp_info = zonaprop.getInfoList()  
+
+  filters = dict({
+    'orden': {
+      'criterio': 'precio',
+      'sentido': 'ascendente'
+    }
+  })
+  zp_info = zonaprop.getInfoList(5, filters)
 
   # Almacenamiento en CSV / Excel
   """
