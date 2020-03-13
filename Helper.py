@@ -18,11 +18,13 @@ def modify_url_string(url, pattern_string, uri_pattern, uri_separator, value):
   """
   pattern = re.compile(pattern_string)
   _re = pattern.findall(url)
+  value = uri_separator + str(value) if value else ''
+
   if(_re):
-    url = pattern.sub(uri_pattern + uri_separator + str(value), url)
+    url = pattern.sub(uri_pattern + value, url)
   else:
     position = url.find('.html')
-    url = url[:position] + uri_separator + uri_pattern + uri_separator + str(value) + url[position:]
+    url = url[:position] + value + url[position:]
 
   return url
 

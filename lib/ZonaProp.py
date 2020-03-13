@@ -7,13 +7,56 @@ from Helper import *
 import pandas as pd
 import re
 
+import sys
+
 class ZonaProp(Scraping):
+  __filters_values_map = dict({
+    'single': [ # Valor que se usa directamente
+      'tipo_operacion',
+      'ubicacion',
+      'tipo_vivienda'
+    ],
+    'key_value': [ # Par clave / valor que se usa directamente
+      'orden'
+    ],
+    'min_max': [ # Valores mínimos / máximos
+      'precio',
+      'expensas',
+      'superficie'
+    ],
+    'quantity': [ # Cantidades
+      'ambientes',
+      'dormitorios'
+    ],
+    'proccess': [ # Procesados de formas particulares
+      'fecha_publicacion'
+    ]
+  })
+
   # Initializer / Instance Attributes
   def __init__(self, config):
     super().__init__(config)
 
     # Cargo archivo de configuración de sitios
     self.config_sites = get_sites_config()
+
+  """
+  def proccessFiltersParameters(self, filters, key):
+    # https://www.zonaprop.com.ar/departamentos-alquiler-caballito-mas-de-2-banos-3-habitaciones-2-ambientes-mas-de-1-garage-10-35-m2-cubiertos-publicado-hace-menos-de-1-semana-100-10000-pesos-100-500-expensas.html
+    #[base_url]-[tipo_operacion]-[zona]-[banos]-[habitaciones]-[ambientes]-[garage]-[mts]-[fecha_publicacion]-[precio]-[expensas]
+
+    pattern_string = self.__filters_map[key]
+    uri_pattern = filters[key]
+    uri_separator = '-'
+    value = filters[key]
+
+    return dict({
+      'pattern_string': pattern_string,
+      'uri_pattern': uri_pattern, 
+      'uri_separator': uri_separator,
+      'value': value
+    })
+  """
 
   def getInfoList(self, limit_pages = 3, filters = dict()):
     """Obtiene la estructura HTML de los items en el listado
@@ -25,54 +68,83 @@ class ZonaProp(Scraping):
     a_info = []
 
     ### Procesamiento de filtros
-    print('filters', filters)
-    """
-    ### Paginado ###
-    https://www.zonaprop.com.ar/departamentos-pagina-2.html
-    https://www.zonaprop.com.ar/departamentos-2-ambientes-orden-precio-ascendente-pagina-2.html
+    # Temporal para no afectar en desarrollo a self.url
+    tmp_url = self.base_url
+    tmp_uri = []
 
-    ### Filtros ###
+    # Inicializo variables
+    _base_url =  self.base_url
+    _tipo_operacion =  ''
+    _zona =  ''
+    _banos =  ''
+    _habitaciones =  ''
+    _ambientes =  ''
+    _garage =  ''
+    _mts =  ''
+    _fecha_publicacion =  ''
+    _precio =  ''
+    _expensas =  ''
+    # ./Inicializo variables
+
+    for key in filters:
+      if key in self.__filters_values_map['single']:
+        tmp_uri.append(filters[key])
+      else:        
+        if key == 'orden':
+          tmp_uri.append(filters[key]['criterio'] + '-' + filters[key]['sentido'])
+        elif key == 'precio':
+          pass
+        elif key == 'expensas':
+          pass
+        elif key == 'ambientes':
+          pass      
+        elif key == 'dormitorios':
+          pass
+        elif key == 'superficie':
+          pass
+        elif key == 'fecha_publicacion':
+          pass
+
+      print('filter', key, filters[key])
+
+    url_template = '{base_url}{tipo_operacion}{zona}{banos}{habitaciones}{ambientes}{garage}{mts}{fecha_publicacion}{precio}{expensas}'.format(
+      base_url = _base_url,
+      tipo_operacion = _tipo_operacion,
+      zona = _zona,
+      banos = _banos,
+      habitaciones = _habitaciones,
+      ambientes = _ambientes,
+      garage = _garage,
+      mts = _mts,
+      fecha_publicacion = _fecha_publicacion,
+      precio = _precio,
+      expensas = _expensas
+    )
+    print('url_template', url_template)
+
+    """
+    print('tmp_url', tmp_url) 
+    print('tmp_uri', tmp_uri)
+    parameters = '-'.join(tmp_uri) if tmp_uri else ''
+    if(parameters):
+      tmp_url += '/' + parameters + '.html'
     
-    # Orden
-    https://www.zonaprop.com.ar/departamentos-orden-publicado-descendente.html
-    https://www.zonaprop.com.ar/departamentos-orden-precio-ascendente.html
-    https://www.zonaprop.com.ar/departamentos-orden-antiguedad-ascendente.html
-
-    # Zona
-    https://www.zonaprop.com.ar/departamentos-alquiler-caballito.html
-    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo.html
-
-    # Rango de precios
-    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-5000-15000-pesos.html
-    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-mas-5000-pesos.html
-    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-menos-15000-pesos.html
-
-    # Expensas
-    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-menos-15000-pesos-100-200-expensas.html
-    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-menos-15000-pesos-mas-100-expensas.html
-    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-menos-15000-pesos-menos-200-expensas.html
-
-    # Ambientes
-    https://www.zonaprop.com.ar/departamentos-alquiler-villa-crespo-2-ambientes-menos-15000-pesos-mas-100-expensas.html
-
-    # Tipo
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-ambientes-menos-15000-pesos-mas-100-expensas.html
-
-    # Habitaciones
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-1-habitacion-2-ambientes-menos-15000-pesos-mas-100-expensas.html
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-15000-pesos-mas-100-expensas.html
-
-    # Superficie
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-mas-15-m2-cubiertos-menos-15000-pesos-mas-100-expensas.html
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-menos-15000-pesos-mas-100-expensas.html
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-15-35-m2-cubiertos-menos-15000-pesos-mas-100-expensas.html
-
-    # Fecha de publicación
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-2-dias-menos-15000-pesos-mas-100-expensas.html
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-1-dia-menos-15000-pesos-mas-100-expensas.html
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-1-semana-menos-15000-pesos-mas-100-expensas.html
-    https://www.zonaprop.com.ar/casas-alquiler-villa-crespo-2-habitaciones-2-ambientes-menos-35-m2-cubiertos-publicado-hace-menos-de-45-dias-menos-15000-pesos-mas-100-expensas.html
+    print('tmp_url despues', tmp_url)
     """
+    
+    """
+    for key in filters:
+      if(key in self.__filters_map):
+        params_dict = self.proccessFiltersParameters(filters, key)
+        print('params_dict', params_dict)
+
+        url = modify_url_string(url, params_dict['pattern_string'], params_dict['uri_pattern'], params_dict['uri_separator'], params_dict['value'])
+
+    #print('self.url', self.url)
+    print('url procesada', url)
+    """
+
+    sys.exit()
     ### ./Procesamiento de filtros
 
     while True:
