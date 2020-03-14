@@ -12,9 +12,10 @@ import sys
 class ZonaProp(Scraping):
   __filters_values_map = dict({
     'single': [ # Valor que se usa directamente
+      'tipo_vivienda',
       'tipo_operacion',
       'ubicacion',
-      'tipo_vivienda'
+      'fecha_publicacion'
     ],
     'key_value': [ # Par clave / valor que se usa directamente
       'orden'
@@ -29,7 +30,7 @@ class ZonaProp(Scraping):
       'dormitorios'
     ],
     'proccess': [ # Procesados de formas particulares
-      'fecha_publicacion'
+      #'fecha_publicacion' # De momento lo pongo como valor fijo
     ]
   })
 
@@ -39,24 +40,6 @@ class ZonaProp(Scraping):
 
     # Cargo archivo de configuración de sitios
     self.config_sites = get_sites_config()
-
-  """
-  def proccessFiltersParameters(self, filters, key):
-    # https://www.zonaprop.com.ar/departamentos-alquiler-caballito-mas-de-2-banos-3-habitaciones-2-ambientes-mas-de-1-garage-10-35-m2-cubiertos-publicado-hace-menos-de-1-semana-100-10000-pesos-100-500-expensas.html
-    #[base_url]-[tipo_operacion]-[zona]-[banos]-[habitaciones]-[ambientes]-[garage]-[mts]-[fecha_publicacion]-[precio]-[expensas]
-
-    pattern_string = self.__filters_map[key]
-    uri_pattern = filters[key]
-    uri_separator = '-'
-    value = filters[key]
-
-    return dict({
-      'pattern_string': pattern_string,
-      'uri_pattern': uri_pattern, 
-      'uri_separator': uri_separator,
-      'value': value
-    })
-  """
 
   def getInfoList(self, limit_pages = 3, filters = dict()):
     """Obtiene la estructura HTML de los items en el listado
@@ -73,78 +56,51 @@ class ZonaProp(Scraping):
     tmp_uri = []
 
     # Inicializo variables
-    _base_url =  self.base_url
-    _tipo_operacion =  ''
-    _zona =  ''
-    _banos =  ''
-    _habitaciones =  ''
-    _ambientes =  ''
-    _garage =  ''
-    _mts =  ''
-    _fecha_publicacion =  ''
-    _precio =  ''
-    _expensas =  ''
-    # ./Inicializo variables
+    filters_dict = dict({
+      'tipo_vivienda': 'departamentos',
+      'tipo_operacion': '',
+      'ubicacion': '',
+      'banos': '',
+      'dormitorios': '',
+      'ambientes': '',
+      'garage': '',
+      'superficie': '',
+      'fecha_publicacion': '',
+      'precio': '',
+      'expensas': '',
+      'orden': ''
+    })
+    # ./Inicializo variables    
 
     for key in filters:
       if key in self.__filters_values_map['single']:
-        tmp_uri.append(filters[key])
+        filters_dict[key] = '-' + filters[key]
+      elif key in self.__filters_values_map['min_max']:
+        _min_max = ''
+        if filters[key]['minimo'] and filters[key]['maximo']:
+          _min_max = str(filters[key]['minimo']) + '-' + str(filters[key]['maximo']) + '-' + filters[key]['unidad']
+        else:
+          if filters[key]['minimo']:
+            _min_max = 'mas-' + str(filters[key]['minimo']) + '-' + str(filters[key]['unidad'])
+          elif filters[key]['maximo']:
+            _min_max = 'menos-' + str(filters[key]['maximo']) + '-' + str(filters[key]['unidad'])
+
+        filters_dict[key] = '-' + _min_max if _min_max else ''
+      elif key in self.__filters_values_map['quantity']:
+        _quantity = ''
+        _slug_start = 'mas-de-' if(filters[key]['cantidad'] >= filters[key]['tope']) else ''
+        _slug_end = filters[key]['slug_plural'] if filters[key]['cantidad'] > 1 else filters[key]['slug_singular']
+        
+        _quantity = _slug_start + str(filters[key]['cantidad']) + '-' + _slug_end
+
+        filters_dict[key] = '-' + _quantity if _quantity else ''
       else:        
         if key == 'orden':
-          tmp_uri.append(filters[key]['criterio'] + '-' + filters[key]['sentido'])
-        elif key == 'precio':
-          pass
-        elif key == 'expensas':
-          pass
-        elif key == 'ambientes':
-          pass      
-        elif key == 'dormitorios':
-          pass
-        elif key == 'superficie':
-          pass
-        elif key == 'fecha_publicacion':
-          pass
+          filters_dict['orden'] = '-' + filters[key]['criterio'] + '-' + filters[key]['sentido']
 
-      print('filter', key, filters[key])
-
-    url_template = '{base_url}{tipo_operacion}{zona}{banos}{habitaciones}{ambientes}{garage}{mts}{fecha_publicacion}{precio}{expensas}'.format(
-      base_url = _base_url,
-      tipo_operacion = _tipo_operacion,
-      zona = _zona,
-      banos = _banos,
-      habitaciones = _habitaciones,
-      ambientes = _ambientes,
-      garage = _garage,
-      mts = _mts,
-      fecha_publicacion = _fecha_publicacion,
-      precio = _precio,
-      expensas = _expensas
-    )
-    print('url_template', url_template)
-
-    """
-    print('tmp_url', tmp_url) 
-    print('tmp_uri', tmp_uri)
-    parameters = '-'.join(tmp_uri) if tmp_uri else ''
-    if(parameters):
-      tmp_url += '/' + parameters + '.html'
-    
-    print('tmp_url despues', tmp_url)
-    """
-    
-    """
-    for key in filters:
-      if(key in self.__filters_map):
-        params_dict = self.proccessFiltersParameters(filters, key)
-        print('params_dict', params_dict)
-
-        url = modify_url_string(url, params_dict['pattern_string'], params_dict['uri_pattern'], params_dict['uri_separator'], params_dict['value'])
-
-    #print('self.url', self.url)
-    print('url procesada', url)
-    """
-
-    sys.exit()
+    url_template = '{tipo_vivienda}{tipo_operacion}{ubicacion}{banos}{dormitorios}{ambientes}{garage}{superficie}{fecha_publicacion}{precio}{expensas}{orden}.html'.format_map(filters_dict)
+    url_template = url_template[1:] if url_template[0] == '-' else url_template    
+    self.url = '{}/{}'.format(self.base_url, url_template)
     ### ./Procesamiento de filtros
 
     while True:

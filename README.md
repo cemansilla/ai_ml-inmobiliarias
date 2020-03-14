@@ -60,12 +60,16 @@ filters = dict({
   },
   'ambientes': {
     'cantidad': 4,
-    'tope': 5 # Si el valor es mayor o igual a esto, a la URL se le agrega "mas"
+    'tope',: 5 # Si el valor es mayor o igual a esto, a la URL se le agrega "mas"
+    'slug_singular': 'ambiente',
+    'slug_plural': 'ambientes'
   },
   'tipo_vivienda': 'departamentos', # departamentos | casas | terrenos | locales-comerciales | oficinas-comerciales | cocheras
   'dormitorios': {
     'cantidad': 4,
-    'tope': 5 # Si el valor es mayor o igual a esto, a la URL se le agrega "mas"
+    'tope': 5, # Si el valor es mayor o igual a esto, a la URL se le agrega "mas"
+    'slug_singular': 'habitacion',
+    'slug_plural': 'habitaciones'
   },
   'superficie': { # Si hay solo mínimo la busqueda será "Desde", Si hay sólo máximo será "Hasta", si están ambos será rango de precios
     'minimo': 100,

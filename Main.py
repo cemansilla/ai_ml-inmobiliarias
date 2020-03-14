@@ -9,40 +9,10 @@ config_sites = get_sites_config()
 config_zonaprop = config_sites.get('zonaprop')
 if(config_zonaprop):
   zonaprop = ZonaProp(config_zonaprop)
-
-  _filters = dict({  
-    'tipo_operacion': 'venta', # venta | alquiler | alquiler-temporal | emprendimientos
-    'orden': {
-      'criterio': 'precio', # publicado | precio | variacionporcentual (bajaron de precio) | area-normalizada (amplios / pequeños en m2) | antiguedad | precio-m2
-      'sentido': 'ascendente' # ascendente | descendente
-    },
-    'ubicacion': '[slug-nombre-ubicacion]', # Lo suele agregar al final
-    'precio': { # Si hay solo mínimo la busqueda será "Desde", Si hay sólo máximo será "Hasta", si están ambos será rango de precios
-      'minimo': 100,
-      'maximo': False,
-      'moneda': 'pesos' # pesos | dolar
-    },
-    'expensas': { # Si hay solo mínimo la busqueda será "Desde", Si hay sólo máximo será "Hasta", si están ambos será rango de precios
-      'minimo': 100,
-      'maximo': False,
-      'moneda': 'pesos' # pesos | dolar
-    },
-    'ambientes': {
-      'cantidad': 4,
-      'tope': 5 # Si el valor es mayor o igual a esto, a la URL se le agrega "mas"
-    },
-    'tipo_vivienda': 'departamentos', # departamentos | casas | terrenos | locales-comerciales | oficinas-comerciales | cocheras
-    'dormitorios': {
-      'cantidad': 4,
-      'tope': 5 # Si el valor es mayor o igual a esto, a la URL se le agrega "mas"
-    },
-    'superficie': { # Si hay solo mínimo la busqueda será "Desde", Si hay sólo máximo será "Hasta", si están ambos será rango de precios
-      'minimo': 100,
-      'maximo': False,
-      'unidad': 'm2' # m2
-    },
-    'fecha_publicacion': 'hace-menos-de-1-dia' # hace-menos-de-1-dia (hoy) | hace-menos-de-2-dias (ayer) | hace-menos-de-1-semana | hace-menos-de-15-dias | hace-menos-de-1-mes | hace-menos-de-45-dias
-  })
+  
+  """
+  # Ejemplo de filtros completo
+  # Se debería procesar un formulario o query params en una petición REST para armar esta estructura
   filters = dict({
     'tipo_operacion': 'venta',
     'orden': {
@@ -50,8 +20,38 @@ if(config_zonaprop):
       'sentido': 'ascendente'
     },
     'ubicacion': 'caballito',
-    'tipo_vivienda': 'departamentos'
+    'tipo_vivienda': 'locales-comerciales',
+    'precio': {
+      'minimo': 100,
+      'maximo': 500,
+      'unidad': 'pesos'
+    },
+    'expensas': {
+      'minimo': 120,
+      'maximo': 520,
+      'unidad': 'expensas'
+    },
+    'superficie': {
+      'minimo': 150,
+      'maximo': 550,
+      'unidad': 'm2'
+    },
+    'ambientes': {
+      'cantidad': 1,
+      'tope': 5,
+      'slug_singular': 'ambiente',
+      'slug_plural': 'ambientes'
+    },
+    'dormitorios': {
+      'cantidad': 5,
+      'tope': 5,
+      'slug_singular': 'habitacion',
+      'slug_plural': 'habitaciones'
+    },
+    'fecha_publicacion': 'hace-menos-de-1-dia'
   })
+  """
+  filters = {}
   zp_info = zonaprop.getInfoList(5, filters)
 
   # Almacenamiento en CSV / Excel
