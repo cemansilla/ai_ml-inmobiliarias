@@ -114,7 +114,10 @@ class ZonaProp(Scraping):
       property_html = self.page_content.find_all('div', {'class': ['posting-card', 'super-highlighted']})
     
       for item in property_html:
-        a_info.append(self.extractData(item))
+        item_data = self.extractData(item)
+        #item_data.update({'filters': filters})
+
+        a_info.append(item_data)
 
       current_page += 1
       if(current_page > limit_pages):
@@ -177,6 +180,10 @@ class ZonaProp(Scraping):
     child_page_content = child_page_html_content.find('h5', {'class': ['section-date']})
     _publish_date = clean_text_string(child_page_content.getText()) if child_page_content else ''
 
+    #Tipo operación
+    child_page_content = child_page_html_content.find('div', {'class': ['price-operation']})
+    _operation_type = clean_text_string(child_page_content.getText()) if child_page_content else ''
+
     #Latitud / Longitud
     child_page_content = child_page_html_content.find('img', {'id': 'static-map'})
     _lat_lng = child_page_content['src'] if child_page_content and child_page_content.has_attr('src') else False
@@ -194,6 +201,7 @@ class ZonaProp(Scraping):
       'site_id': _id,
       'href': _href,
       'address': _address,
+      'operation_type': _operation_type,
       'lat_lng': _lat_lng,
       'title': _title,
       'features': _features,

@@ -51,8 +51,11 @@ if(config_zonaprop):
     'fecha_publicacion': 'hace-menos-de-1-dia'
   })
   """
-  filters = {}
-  zp_info = zonaprop.getInfoList(5, filters)
+  filters = {
+    'tipo_operacion': 'alquiler',
+    'ubicacion': 'caballito'
+  }
+  zp_info = zonaprop.getInfoList(10, filters)
 
   # Almacenamiento en CSV / Excel
   """
@@ -72,11 +75,9 @@ if(config_zonaprop):
     """
 
     # Inserto / Actualizo en MongoDB desde scraping
-    """
     for data in zp_info:
       condition = { 'site_id': data['site_id'] }
       mc.update('inmuebles', data, condition)
-    """
     
     # Inserto / Actualizo en MongoDB desde Excel
     """
